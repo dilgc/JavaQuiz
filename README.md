@@ -5,4 +5,4 @@ To add:
 - Quiz result page
 - Quiz save file import/export
 - Stability fixes
-  + More
+- & More
