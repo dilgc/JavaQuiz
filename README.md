@@ -7,3 +7,5 @@ To add:
 - Quiz save file import/export
 - Stability fixes
 - & More
+
+Requires JavaFX
