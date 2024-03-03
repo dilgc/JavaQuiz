@@ -29,7 +29,7 @@ public class Main extends Application {
         //Set the scene with the main menu
         VBox root = new MainMenuView().getRoot();
 
-        Scene scene = new Scene(root, 500, 300);
+        Scene scene = new Scene(root, 500, 350);
 
         stage.setResizable(false);
         stage.setScene(scene);

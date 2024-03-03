@@ -1,16 +1,21 @@
 package views;
 
+import SampleQuizzes.SampleQuizzes;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import model.Quiz;
+import model.QuizBag;
 import util.MenuData;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MainMenuView implements MenuData {
     //Declare the labels
@@ -40,17 +45,49 @@ public class MainMenuView implements MenuData {
     //Declare the HBoxes
     private HBox contentBox;
 
+    //Declare the QuizBag
+    private QuizBag quizBag;
 
+    //Declare the menu bar and its contents
+    private MenuBar menuBar;
+    private Menu fileMenu;
+    private MenuItem importSamplesItem;
+
+    //Declare the arraylist that will have the current page's quizzes
+    private ArrayList<Quiz> currentPageQuizzes;
+    private Quiz sampleQuiz;
     /**
      * Puts together the stage for the main menu
      */
     public MainMenuView(){
+
+        quizBag = new QuizBag();
+        //FIXME: Add try/catch loading, instead of generating a new quiz bag each time the program is run
+
+        //Initialize the menu bar and its contents
+        menuBar = new MenuBar();
+        fileMenu = new Menu("File");
+        importSamplesItem = new MenuItem("Import Samples");
+
+        fileMenu.getItems().add(importSamplesItem);
+        menuBar.getMenus().add(fileMenu);
+
+        //Create what happens when you press File > Import Samples
+        importSamplesItem.setOnAction(event -> {
+            currentPageQuizzes = new ArrayList<>();
+            sampleQuiz = new Quiz(SampleQuizzes.Sample_WhichDangan());
+            quizBag.insertQuiz(sampleQuiz);
+            currentPageQuizzes = quizBag.getPageQuizzes(1);
+            fillSlots();
+        });
+
         //Initialize the labels
         pageNumLabel = new Label("Page #:");
         titleLabel = new Label("JavaQuiz by Charles Dilger");
         selectionLabel = new Label("Our quiz selection: ");
 
-        //FIXME add formatting for the labels
+        //Format the labels
+        titleLabel.setFont(Font.font(20));
 
         //Initialize the buttons
         selection1Button = new Button("[ EMPTY ]");
@@ -78,6 +115,13 @@ public class MainMenuView implements MenuData {
         //Initialize and fill the list view of page numbers
         pagesListView = new ListView<>(pages);
 
+        pagesListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue != null){
+                currentPageQuizzes = quizBag.getPageQuizzes(newValue);
+                fillSlots();
+            }
+        });
+
         //Initialize the VBoxes and HBoxes
         pageBox = new VBox(5, pageNumLabel, pagesListView);
         buttonBox = new VBox(2, selection1Button, selection2Button, selection3Button, selection4Button);
@@ -93,7 +137,7 @@ public class MainMenuView implements MenuData {
         buttonBox.setPrefWidth(355);
 
         //Create the root
-        root = new VBox(10, titleBox, contentBox);
+        root = new VBox(10, menuBar, titleBox, new Line(20, 0, 500, 0), contentBox);
         root.setAlignment(Pos.CENTER);
 
      }
@@ -103,6 +147,24 @@ public class MainMenuView implements MenuData {
      */
     public VBox getRoot(){
         return root;
+     }
+
+
+    /**
+     * Updates the quizzes on the menu (for when the user changes the page)
+     */
+    public void fillSlots(){
+        Iterator<Quiz> pageQuizIterator= currentPageQuizzes.listIterator();
+        Button[] buttonArray = {selection1Button, selection2Button, selection3Button, selection4Button};
+        int buttonCounter = 0;
+        while(pageQuizIterator.hasNext() && buttonCounter < 4){
+            Quiz quiz = pageQuizIterator.next();
+            System.out.println(quiz.getTitle());
+            buttonArray[buttonCounter++].setText(quiz.getTitle());
+        }
+        while(buttonCounter < 4){
+            buttonArray[buttonCounter++].setText("[ EMPTY ]");
+        }
      }
 
 }
